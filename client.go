@@ -23,11 +23,6 @@ type rectangle struct {
 	CreationTime time.Time `json: time`
 }
 
-type loc struct {
-	Lat float32 `json: lat`
-	Lon float32 `json: lon`
-}
-
 func client() {
 
 	clientData := data{
