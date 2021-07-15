@@ -8,60 +8,89 @@ import (
 	"net/http"
 )
 
-type weatherData struct {
-	LocationName string   `json: locationName`
-	Weather      string   `json: weather`
-	Temperature  int      `json: temperature`
-	Celsius      bool     `json: celsius`
-	TempForecast []int    `json: temp_forecast`
-	Wind         windData `json: wind`
+type data struct {
+	Main  rectangle   `json: main`
+	Input []rectangle `json: input`
 }
 
-type windData struct {
-	Direction string `json: direction`
-	Speed     int    `json: speed`
-}
-type loc struct {
-	Lat float32 `json: lat`
-	Lon float32 `json: lon`
+type rectangle struct {
+	X      int `json: x`
+	Y      int `json: y`
+	Width  int `json: width`
+	Height int `json: height`
 }
 
-func weatherHandler(w http.ResponseWriter, r *http.Request) {
-	location := loc{}
-	jsn, err := ioutil.ReadAll(r.Body)
+func appendFile(newData data) {
+	filename := "file.json"
+	// err := checkFile(filename)
+	// if err != nil {
+	//     log.Fatal(err)
+	// }
+
+	file, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatal("Error reading the body", err)
+		log.Fatal(err)
 	}
-	err = json.Unmarshal(jsn, &location)
+
+	clientData := []data{}
+
+	// Here the magic happens!
+	json.Unmarshal(file, &clientData)
+
+	clientData = append(clientData, newData)
+
+	// Preparing the data to be marshalled and written.
+	dataBytes, err := json.Marshal(clientData)
 	if err != nil {
-		log.Fatal("Decoding error: ", err)
-	}
-	log.Printf("Received: %v\n", location)
-
-	weather := weatherData{
-		LocationName: "Zzyzx",
-		Weather:      "cloudy",
-		Temperature:  31,
-		Celsius:      true,
-		TempForecast: []int{30, 32, 29},
-		Wind: windData{
-			Direction: "S",
-			Speed:     20,
-		},
+		log.Fatal(err)
 	}
 
-	weatherJson, err := json.Marshal(weather)
+	err = ioutil.WriteFile(filename, dataBytes, 0644)
 	if err != nil {
-		fmt.Fprintf(w, "Error: %s", err)
+		log.Fatal(err)
 	}
-	w.Header().Set("Content-Type", "application/json")
+}
 
-	w.Write(weatherJson)
+func fileHandler(w http.ResponseWriter, r *http.Request) {
 
+	switch r.Method {
+
+	case "GET":
+		fmt.Println("get")
+
+		break
+	case "POST":
+		fmt.Println("post")
+		newData := data{}
+		jsn, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Fatal("Error reading the body", err)
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = json.Unmarshal(jsn, &newData)
+		appendFile(newData)
+		if err != nil {
+			log.Fatal("Decoding error: ", err)
+		}
+		clientData := data{
+			Main:  rectangle{2, 3, 4, 5},
+			Input: []rectangle{{6, 7, 8, 9}, {1, 4, 7, 8}},
+		}
+
+		clientDataJson, err := json.Marshal(clientData)
+		if err != nil {
+			fmt.Fprintf(w, "Error: %s", err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write(clientDataJson)
+	}
 }
 
 func server() {
-	http.HandleFunc("/", weatherHandler)
+	http.HandleFunc("/", fileHandler)
 	http.ListenAndServe(":8088", nil)
 }
 func main() {

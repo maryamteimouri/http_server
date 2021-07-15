@@ -9,19 +9,18 @@ import (
 	"net/http"
 )
 
-type weatherData struct {
-	LocationName string   `json: locationName`
-	Weather      string   `json: weather`
-	Temperature  int      `json: temperature`
-	Celsius      bool     `json: celsius`
-	TempForecast []int    `json: temp_forecast`
-	Wind         windData `json: wind`
+type data struct {
+	Main  rectangle   `json: main`
+	Input []rectangle `json: input`
 }
 
-type windData struct {
-	Direction string `json: direction`
-	Speed     int    `json: speed`
+type rectangle struct {
+	X      int `json: x`
+	Y      int `json: y`
+	Width  int `json: width`
+	Height int `json: height`
 }
+
 type loc struct {
 	Lat float32 `json: lat`
 	Lon float32 `json: lon`
@@ -29,8 +28,12 @@ type loc struct {
 
 func client() {
 
-	locJson, err := json.Marshal(loc{Lat: 35.14326, Lon: -116.104})
-	req, err := http.NewRequest("POST", "http://localhost:8088", bytes.NewBuffer(locJson))
+	clientData := data{
+		Main:  rectangle{2, 3, 4, 5},
+		Input: []rectangle{{6, 7, 8, 9}, {1, 4, 7, 8}},
+	}
+	clientDataJson, err := json.Marshal(clientData)
+	req, err := http.NewRequest("POST", "http://localhost:8088", bytes.NewBuffer(clientDataJson))
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
