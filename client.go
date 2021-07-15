@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 type data struct {
@@ -15,10 +16,11 @@ type data struct {
 }
 
 type rectangle struct {
-	X      int `json: x`
-	Y      int `json: y`
-	Width  int `json: width`
-	Height int `json: height`
+	X            int       `json: x`
+	Y            int       `json: y`
+	Width        int       `json: width`
+	Height       int       `json: height`
+	CreationTime time.Time `json: time`
 }
 
 type loc struct {
@@ -29,11 +31,11 @@ type loc struct {
 func client() {
 
 	clientData := data{
-		Main:  rectangle{2, 3, 4, 5},
-		Input: []rectangle{{6, 7, 8, 9}, {1, 4, 7, 8}},
+		Main:  rectangle{0, 0, 10, 20, time.Now().Local()},
+		Input: []rectangle{{2, 18, 5, 4, time.Now().Local()}, {12, 18, 5, 4, time.Now().Local()}},
 	}
 	clientDataJson, err := json.Marshal(clientData)
-	req, err := http.NewRequest("POST", "http://localhost:8088", bytes.NewBuffer(clientDataJson))
+	req, err := http.NewRequest("GET", "http://localhost:8088", bytes.NewBuffer(clientDataJson))
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
