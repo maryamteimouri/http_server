@@ -31,8 +31,8 @@ type loc struct {
 func client() {
 
 	clientData := data{
-		Main:  rectangle{0, 0, 10, 20, time.Now().Local()},
-		Input: []rectangle{{2, 18, 5, 4, time.Now().Local()}, {12, 18, 5, 4, time.Now().Local()}},
+		Main:  rectangle{3, 2, 5, 10, time.Now().Local()},
+		Input: []rectangle{{4, 10, 1, 1, time.Now().Local()}, {9, 10, 5, 4, time.Now().Local()}},
 	}
 	clientDataJson, err := json.Marshal(clientData)
 	req, err := http.NewRequest("GET", "http://localhost:8088", bytes.NewBuffer(clientDataJson))
